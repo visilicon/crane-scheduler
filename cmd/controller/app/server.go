@@ -109,20 +109,21 @@ func Run(cc *config.CompletedConfig, stopCh <-chan struct{}) error {
 	}
 
 	electionChecker := leaderelection.NewLeaderHealthzAdaptor(time.Second * 20)
-	leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{
-		Lock:          rl,
-		LeaseDuration: cc.LeaderElection.LeaseDuration.Duration,
-		RenewDeadline: cc.LeaderElection.RenewDeadline.Duration,
-		RetryPeriod:   cc.LeaderElection.RetryPeriod.Duration,
-		Callbacks: leaderelection.LeaderCallbacks{
-			OnStartedLeading: run,
-			OnStoppedLeading: func() {
-				panic("leaderelection lost")
+	leaderelection.RunOrDie(context.TODO(),
+		leaderelection.LeaderElectionConfig{
+			Lock:          rl,
+			LeaseDuration: cc.LeaderElection.LeaseDuration.Duration,
+			RenewDeadline: cc.LeaderElection.RenewDeadline.Duration,
+			RetryPeriod:   cc.LeaderElection.RetryPeriod.Duration,
+			Callbacks: leaderelection.LeaderCallbacks{
+				OnStartedLeading: run,
+				OnStoppedLeading: func() {
+					panic("leaderelection lost")
+				},
 			},
-		},
-		WatchDog: electionChecker,
-		Name:     "crane-scheduler-controller",
-	})
+			WatchDog: electionChecker,
+			Name:     "crane-scheduler-controller",
+		})
 
 	panic("unreachable")
 }
